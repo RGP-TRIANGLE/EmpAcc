@@ -10,15 +10,14 @@ namespace TestApp.Model
 {
     public class Employee
     {
+        public string ID { get; set; }
         public string FullName { get; set; }
-
-        public int TabelNumber { get; set; }
-
         public string Department { get; set; }
+        public string JobPost { get; set; }
         public string Email { get; set; }
         public string Phone { get; set; }
         public DateTime DateReception { get; set; }
-        public DateTime? DateDismissal { get; set; }
+        public DateTime DateDismissal { get; set; }
         public string RecordStatus { get; set; }
 
         public List<Employee> EmployeesRepository { get; set; }

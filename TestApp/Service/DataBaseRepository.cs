@@ -17,9 +17,9 @@ namespace TestApp.Service
         Employee emp = new Employee();
         public IList<Employee> Employeeslist { get; set; }
 
-        public void SaveEmployee(string full_name, int tabel_namber, string department, string email, string phone, DateTime date_reception, DateTime date_dismissal, string record_status)
+        public void SaveEmployee(string ID, string full_name, string department, string job_post, string email, string phone, DateTime date_reception, DateTime date_dismissal, string record_status)
         {
-            using (var db = new LiteDatabase(@"DataBase4.db"))
+            using (var db = new LiteDatabase(@"DataBase20.db"))
             {
                 try
                 {
@@ -28,9 +28,11 @@ namespace TestApp.Service
 
                     var save_emp = new Employee 
                     { 
+                        ID = ID,
                         FullName = full_name, 
-                        TabelNumber = tabel_namber,
+                        //TabelNumber = tabel_namber,
                         Department = department,
+                        JobPost = job_post,
                         Email = email,
                         Phone = phone,
                         DateReception = date_reception,
@@ -42,9 +44,11 @@ namespace TestApp.Service
                     { 
                         new Employee 
                         {
+                            ID = save_emp.ID,
                             FullName = full_name,
-                            TabelNumber = tabel_namber,
+                            //TabelNumber = tabel_namber,
                             Department = department,
+                            JobPost = job_post,
                             Email = email,
                             Phone = phone,
                             DateReception = date_reception,
@@ -53,7 +57,7 @@ namespace TestApp.Service
                         } 
                     };
 
-                    if (col.Find(x => x.TabelNumber == tabel_namber).FirstOrDefault() == null)
+                    if (col.Find(x => x.ID == ID).FirstOrDefault() == null)
                     {
                         col.Insert(save_emp);
                         Debug.WriteLine("           Физическое лицо сохранено в БД");
@@ -61,21 +65,21 @@ namespace TestApp.Service
                     else
                     {
                         col.Update(save_emp);
-                        Debug.WriteLine("           Физическое лицо создано в БД");
+                        Debug.WriteLine("           Физическое лицо обновлено в БД");
                     }
 
 
                 }
                 catch (Exception ex)
                 {
-                    Debug.WriteLine("           Ошибка при сохранении организации в БД в репозитории: " + ex.Message);
+                    Debug.WriteLine("           Ошибка при сохранении сотрудника в БД в репозитории: " + ex.Message);
                 }
             }
         }
 
         public List<Employee> GetEmployees()
         {
-            using (var db = new LiteDatabase(@"DataBase4.db"))
+            using (var db = new LiteDatabase(@"DataBase20.db"))
             {
                 Employeeslist = new List<Employee>();
 
@@ -90,9 +94,10 @@ namespace TestApp.Service
                     var lst = col.FindAll().Select(select_emp =>
                     new Employee
                     {
+                        ID = select_emp.ID,
                         FullName = select_emp.FullName,
-                        TabelNumber = select_emp.TabelNumber,
                         Department = select_emp.Department,
+                        JobPost = select_emp.JobPost,
                         Email = select_emp.Email,
                         Phone = select_emp.Phone,
                         DateReception = select_emp.DateReception,
@@ -114,9 +119,9 @@ namespace TestApp.Service
             }
         }
 
-        public Employee GetEmployee(int tabel_number)
+        public Employee GetEmployee(string ID)
         {
-            var employee = GetEmployees().Where(x => x.TabelNumber == tabel_number).FirstOrDefault();
+            var employee = GetEmployees().Where(x => x.ID == ID).FirstOrDefault();
             
             if(employee != null)
             {
@@ -130,25 +135,180 @@ namespace TestApp.Service
 
         public void DeleteEmployee(Employee employee)
         {
-            using (var db = new LiteDatabase(@"DataBase4.db"))
+            using (var db = new LiteDatabase(@"DataBase20.db"))
             {
-                var col = db.GetCollection<Employee>("Employees");
+                try
+                {
+                    var col = db.GetCollection<Employee>("Employees");
 
-                //var local_result = col.Find(x => x.TabelNumber == tab_number).FirstOrDefault();
+                    //var local_result = col.Find(x => x.TabelNumber == tab_number).FirstOrDefault();
 
-                //Debug.WriteLine("           Физическое лицо для удаление определено: " + local_result.FullName);
+                    //Debug.WriteLine("           Физическое лицо для удаление определено: " + local_result.FullName);
 
-                col.Delete(employee.FullName);
+                    col.Delete(employee.ID);
 
-                Debug.WriteLine("           Физическое лицо удалено из БД");
+                    Debug.WriteLine("           Физическое лицо удалено из БД");
+                }
+                catch(Exception e)
+                {
+                    Debug.WriteLine("Ошибка при удалении сотрудника: " + e.Message);
+                }
+                
             }
         }
 
         public void DeleteAllEmployees()
         {
-            using (var db = new LiteDatabase(@"DataBase4.db"))
+            using (var db = new LiteDatabase(@"DataBase20.db"))
             {
                 var col = db.GetCollection<Employee>("Employees");
+
+                col.DeleteAll();
+
+                Debug.WriteLine("           Физические лица удалены из БД");
+            }
+        }
+
+        #endregion
+
+
+
+
+
+        #region Department
+
+        Department dep = new Department();
+        public IList<Department> Departmentslist { get; set; }
+
+        public void SaveDepartment(string ID, string name, string main_department, string leader, string status)
+        {
+            using (var db = new LiteDatabase(@"DataBase20.db"))
+            {
+                try
+                {
+                    // Получаем коллекцию
+                    var col = db.GetCollection<Department>("Departments");
+
+                    var save_emp = new Department
+                    {
+                        ID = ID,
+                        Name = name,
+                        MainDepartment = main_department,
+                        Leader = leader,
+                        RecordStatus = status
+                    };
+
+                    save_emp.DepartmentsRepository = new List<Department>
+                    {
+                        new Department
+                        {
+                            ID = save_emp.ID,
+                            Name = name,
+                            MainDepartment = main_department,
+                            Leader = leader,
+                            RecordStatus = status
+                        }
+                    };
+
+                    if (col.Find(x => x.ID == ID).FirstOrDefault() == null)
+                    {
+                        col.Insert(save_emp);
+                        Debug.WriteLine("           Физическое лицо сохранено в БД");
+                    }
+                    else
+                    {
+                        col.Update(save_emp);
+                        Debug.WriteLine("           Физическое лицо создано в БД");
+                    }
+
+
+                }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine("           Ошибка при сохранении сотрудника в БД в репозитории: " + ex.Message);
+                }
+            }
+        }
+
+        public List<Department> GetDepartments()
+        {
+            using (var db = new LiteDatabase(@"DataBase20.db"))
+            {
+                Departmentslist = new List<Department>();
+
+                var col = db.GetCollection<Department>("Departments");
+
+                if (col.FindAll().Count() > 0)
+                {
+                    var local_result = col.FindAll();
+
+                    Debug.WriteLine("           Список физических лиц НАЙДЕН");
+
+                    var lst = col.FindAll().Select(select_emp =>
+                    new Department
+                    {
+                        ID = select_emp.ID,
+                        Name = select_emp.Name,
+                        MainDepartment = select_emp.MainDepartment,
+                        Leader = select_emp.Leader,
+                        RecordStatus = select_emp.RecordStatus,
+                    });
+
+                    Departmentslist = new List<Department>(lst);
+
+                    return (List<Department>)Departmentslist;
+                }
+                else
+                {
+                    Debug.WriteLine("           Список физических лиц НЕ найден");
+                    return null;
+                }
+            }
+        }
+
+        public Department GetDepartment(string ID)
+        {
+            var employee = GetDepartments().Where(x => x.ID == ID).FirstOrDefault();
+
+            if (employee != null)
+            {
+                return employee;
+            }
+            else
+            {
+                return null;
+            }
+        }
+
+        public void DeleteDepartment(Department department)
+        {
+            using (var db = new LiteDatabase(@"DataBase20.db"))
+            {
+                try
+                {
+                    var col = db.GetCollection<Department>("Departments");
+
+                    //var local_result = col.Find(x => x.TabelNumber == tab_number).FirstOrDefault();
+
+                    //Debug.WriteLine("           Физическое лицо для удаление определено: " + local_result.FullName);
+
+                    col.Delete(department.ID);
+
+                    Debug.WriteLine("           Физическое лицо удалено из БД");
+                }
+                catch (Exception e)
+                {
+                    Debug.WriteLine("Ошибка при удалении сотрудника: " + e.Message);
+                }
+
+            }
+        }
+
+        public void DeleteAllDepartments()
+        {
+            using (var db = new LiteDatabase(@"DataBase20.db"))
+            {
+                var col = db.GetCollection<Department>("Departments");
 
                 col.DeleteAll();
 
